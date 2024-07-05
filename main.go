@@ -34,8 +34,8 @@ type Response struct {
 }
 
 func getIP(r *http.Request) string {
-	// ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-	userIP := net.ParseIP("81.2.69.142")
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	userIP := net.ParseIP(ip)
 	if userIP == nil {
 		userIP = net.ParseIP(r.Header.Get("X-Real-Ip"))
 	}
