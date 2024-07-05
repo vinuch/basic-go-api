@@ -66,6 +66,7 @@ func getLocation(ip string) (string, string) {
 }
 
 func getTemperature(city string) (float64, error) {
+	
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -114,6 +115,12 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+
+	if _, exists := os.LookupEnv("RAILWAY_ENVIRONMENT"); exists == false {
+		if err := godotenv.Load(); err != nil {
+			log.Fatal("error loading .env file:", err)
+		}
+	}
 	// Hello world http server
 	// http.HandleFunc("/hello-world", func(w http.ResponseWriter, r *http.Request) {
 	// 	w.Write([]byte("hello world"))
