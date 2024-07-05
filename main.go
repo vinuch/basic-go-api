@@ -1,6 +1,5 @@
 package main
 
-
 import (
 	// "basic-web-server/api"
 	// "fmt"
@@ -16,9 +15,9 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/oschwald/geoip2-golang"
-
 	// "github.com/gorilla/mux"
 )
+
 // func Handler(w http.ResponseWriter, r *http.Request) {
 // 	fmt.Fprintf(w, "<h1>your successfully deployed golang page</h1>")
 // }
@@ -29,9 +28,9 @@ import (
 // }
 
 type Response struct {
-	ClientIP  string `json:"client_ip"`
-	Location  string `json:"location"`
-	Greeting  string `json:"greeting"`
+	ClientIP string `json:"client_ip"`
+	Location string `json:"location"`
+	Greeting string `json:"greeting"`
 }
 
 func getIP(r *http.Request) string {
@@ -66,10 +65,11 @@ func getLocation(ip string) (string, string) {
 }
 
 func getTemperature(city string) (float64, error) {
-	
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if _, exists := os.LookupEnv("RAILWAY_ENVIRONMENT"); exists == false {
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	apiKey := os.Getenv("OPENWEATHERMAP_API_KEY")
@@ -116,11 +116,6 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	if _, exists := os.LookupEnv("RAILWAY_ENVIRONMENT"); exists == false {
-		if err := godotenv.Load(); err != nil {
-			log.Fatal("error loading .env file:", err)
-		}
-	}
 	// Hello world http server
 	// http.HandleFunc("/hello-world", func(w http.ResponseWriter, r *http.Request) {
 	// 	w.Write([]byte("hello world"))
@@ -134,4 +129,4 @@ func main() {
 	// http.ListenAndServe(":8080", srv)
 	fmt.Println("Server is running on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
-}  
+}
