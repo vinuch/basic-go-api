@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"net/url"
 	// "net/http"
 	"os"
 	// "strings"
@@ -140,14 +141,14 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	clientIP := getIP(r)
 	city, _ := getLocation(clientIP)
 
-	// temp, err := getTemperature(url.QueryEscape(city))
-	// if err != nil {
-	// 	log.Printf("Error getting temperature: %v", err)
-	// 	http.Error(w, "Could not fetch temperature", http.StatusInternalServerError)
-	// 	return
-	// }
+	temp, err := getTemperature(url.QueryEscape(city))
+	if err != nil {
+		log.Printf("Error getting temperature: %v", err)
+		http.Error(w, "Could not fetch temperature", http.StatusInternalServerError)
+		return
+	}
 
-	greeting := fmt.Sprintf("Hello, %s!, the temperature is %s degrees Celsius in %s", visitorName, city)
+	greeting := fmt.Sprintf("Hello, %s!, the temperature is %s degrees Celsius in %s", visitorName, temp, city)
 
 	response := Response{
 		ClientIP: clientIP,
