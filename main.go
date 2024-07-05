@@ -93,7 +93,7 @@ func getTemperature(city string) (float64, error) {
 		return 0, fmt.Errorf("city not provided")
 	}
 
-	
+
 	if _, exists := os.LookupEnv("RAILWAY_ENVIRONMENT"); exists == false {
 		err := godotenv.Load()
 		if err != nil {
@@ -135,7 +135,7 @@ func getTemperature(city string) (float64, error) {
 
 	return temp, nil
 }
-
+// test
 func helloHandler(w http.ResponseWriter, r *http.Request) {
 	visitorName := r.URL.Query().Get("visitor_name")
 	clientIP := getIP(r)
