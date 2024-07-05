@@ -59,18 +59,17 @@ func getIP(r *http.Request) string {
 		// If both headers are empty, fall back to RemoteAddr
 		ip, _, _ = net.SplitHostPort(r.RemoteAddr)
 	}
-	
+
 	// Parse the IP address
 	userIP := net.ParseIP(ip)
-	
+
 	// If parsing failed or no IP was found, default to localhost
 	if userIP == nil {
 		userIP = net.IPv4(127, 0, 0, 1)
 	}
-	
+
 	return userIP.String()
 }
-
 
 func getLocation(ip string) (string, string) {
 	db, err := geoip2.Open("GeoLite2-City.mmdb")
@@ -89,6 +88,12 @@ func getLocation(ip string) (string, string) {
 }
 
 func getTemperature(city string) (float64, error) {
+
+	if city == "" {
+		return 0, fmt.Errorf("city not provided")
+	}
+
+	
 	if _, exists := os.LookupEnv("RAILWAY_ENVIRONMENT"); exists == false {
 		err := godotenv.Load()
 		if err != nil {
@@ -97,19 +102,37 @@ func getTemperature(city string) (float64, error) {
 	}
 
 	apiKey := os.Getenv("OPENWEATHERMAP_API_KEY")
-	url := fmt.Sprintf("http://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&appid=%s", city, apiKey)
+	if apiKey == "" {
+		return 0, fmt.Errorf("API key not set")
+	}
+
+	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?q=%s&units=metric&appid=%s", city, apiKey)
 	resp, err := http.Get(url)
 	if err != nil {
 		return 0, err
 	}
 	defer resp.Body.Close()
 
-	var weatherResponse map[string]interface{}
-	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
-		return 0, err
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("received non-200 response: %d %s", resp.StatusCode, http.StatusText(resp.StatusCode))
 	}
 
-	temp := weatherResponse["main"].(map[string]interface{})["temp"].(float64)
+	var weatherResponse map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&weatherResponse); err != nil {
+		return 0, fmt.Errorf("error decoding JSON response: %v", err)
+	}
+
+	// Extract the temperature value
+	main, ok := weatherResponse["main"].(map[string]interface{})
+	if !ok {
+		return 0, fmt.Errorf("error parsing 'main' field from response")
+	}
+
+	temp, ok := main["temp"].(float64)
+	if !ok {
+		return 0, fmt.Errorf("error parsing 'temp' field from response")
+	}
+
 	return temp, nil
 }
 
@@ -118,14 +141,14 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	clientIP := getIP(r)
 	city, _ := getLocation(clientIP)
 
-	// temp, err := getTemperature(city)
-	// if err != nil {
-	// 	log.Printf("Error getting temperature: %v", err)
-	// 	http.Error(w, "Could not fetch temperature", http.StatusInternalServerError)
-	// 	return
-	// }
+	temp, err := getTemperature(city)
+	if err != nil {
+		log.Printf("Error getting temperature: %v", err)
+		http.Error(w, "Could not fetch temperature", http.StatusInternalServerError)
+		return
+	}
 
-	greeting := fmt.Sprintf("Hello, %s!, the temperature is %s! degrees Celsius in %s", visitorName, city, city)
+	greeting := fmt.Sprintf("Hello, %s!, the temperature is %f degrees Celsius in %s", visitorName, temp, city)
 
 	response := Response{
 		ClientIP: clientIP,
