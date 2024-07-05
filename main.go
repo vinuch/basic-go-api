@@ -12,7 +12,7 @@ import (
 	// "net/http"
 	"os"
 	// "strings"
-
+	"net/url"
 	"github.com/joho/godotenv"
 	"github.com/oschwald/geoip2-golang"
 	// "github.com/gorilla/mux"
@@ -141,7 +141,7 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 	clientIP := getIP(r)
 	city, _ := getLocation(clientIP)
 
-	temp, err := getTemperature(city)
+	temp, err := getTemperature(url.QueryEscape(city))
 	if err != nil {
 		log.Printf("Error getting temperature: %v", err)
 		http.Error(w, "Could not fetch temperature", http.StatusInternalServerError)
