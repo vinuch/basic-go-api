@@ -148,7 +148,7 @@ func helloHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	greeting := fmt.Sprintf("Hello, %s!, the temperature is %s degrees Celsius in %s", visitorName, temp, city)
+	greeting := fmt.Sprintf("Hello, %s!, the temperature is %f degrees Celsius in %s", visitorName, temp, city)
 
 	response := Response{
 		ClientIP: clientIP,
