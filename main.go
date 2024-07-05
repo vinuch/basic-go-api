@@ -12,7 +12,6 @@ import (
 	// "net/http"
 	"os"
 	// "strings"
-	"net/url"
 	"github.com/joho/godotenv"
 	"github.com/oschwald/geoip2-golang"
 	// "github.com/gorilla/mux"
